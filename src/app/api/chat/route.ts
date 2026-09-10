@@ -32,6 +32,15 @@ function invalidRequest(message: string) {
   return Response.json({ error: message }, { status: 400 });
 }
 
+function isProviderAuthenticationError(error: unknown) {
+  return Boolean(
+    error &&
+      typeof error === "object" &&
+      "status" in error &&
+      (error as { status?: unknown }).status === 401,
+  );
+}
+
 export async function POST(request: Request) {
   let body: ChatRequestBody;
 
@@ -76,6 +85,14 @@ export async function POST(request: Request) {
       return Response.json(
         { error: "The AI provider is not configured. Check the server environment." },
         { status: 500 },
+      );
+    }
+
+    if (isProviderAuthenticationError(error)) {
+      console.error("Google AI authentication error:", error);
+      return Response.json(
+        { error: "Google rejected the API key. Check the Netlify production key and its API restrictions." },
+        { status: 502 },
       );
     }
 
