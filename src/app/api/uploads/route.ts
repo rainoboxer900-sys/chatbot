@@ -86,7 +86,10 @@ export async function POST(request: Request) {
 
   return Response.json({
     success: true,
+    key,
     fileName: file.name,
+    contentType: file.type,
+    size: file.size,
     remaining: MAX_FILES_PER_DAY - blobs.length - 1,
   });
 }

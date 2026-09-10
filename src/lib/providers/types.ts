@@ -5,6 +5,12 @@ export type ChatMessage = {
   content: string;
 };
 
+export type ChatAttachment = {
+  name: string;
+  mimeType: string;
+  data: string;
+};
+
 export interface ChatProvider {
-  generateReply(messages: ChatMessage[], model?: string): Promise<string>;
+  generateReply(messages: ChatMessage[], model?: string, attachments?: ChatAttachment[]): Promise<string>;
 }

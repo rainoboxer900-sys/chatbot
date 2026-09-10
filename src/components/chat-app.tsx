@@ -23,6 +23,13 @@ type AuthState = {
   user?: { name: string; email: string; picture: string | null };
 };
 
+type UploadedFile = {
+  key: string;
+  name: string;
+  mimeType: string;
+  size: number;
+};
+
 const STORAGE_KEY = "ai-chat-conversations";
 const INITIAL_MESSAGE = "Ask me anything. I will keep this conversation in your browser.";
 
@@ -124,6 +131,7 @@ export default function ChatApp() {
   const [auth, setAuth] = useState<AuthState>({ configured: false, authenticated: false });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const abortRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -233,13 +241,16 @@ export default function ChatApp() {
         const formData = new FormData();
         formData.append("file", file);
         const response = await fetch("/api/uploads", { method: "POST", body: formData });
-        const data = (await response.json()) as { success?: boolean; error?: string; remaining?: number };
+        const data = (await response.json()) as { success?: boolean; error?: string; remaining?: number; key?: string; contentType?: string; fileName?: string; size?: number };
 
         if (!response.ok || !data.success) {
           throw new Error(data.error ?? "The file could not be uploaded.");
         }
 
         uploaded += 1;
+        if (data.key && data.fileName && data.contentType && data.size) {
+          setUploadedFiles((current) => [...current, { key: data.key!, name: data.fileName!, mimeType: data.contentType!, size: data.size! }]);
+        }
         setUploadStatus(`${uploaded} file${uploaded === 1 ? "" : "s"} stored. ${data.remaining} upload${data.remaining === 1 ? "" : "s"} left today.`);
       }
     } catch (uploadError) {
@@ -284,7 +295,7 @@ export default function ChatApp() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: messagesForRequest, model: selectedModel }),
+        body: JSON.stringify({ messages: messagesForRequest, model: selectedModel, attachments: uploadedFiles }),
         signal: controller.signal,
       });
       const data = (await response.json()) as { reply?: string; error?: string };
@@ -304,6 +315,7 @@ export default function ChatApp() {
             : conversation,
         ),
       );
+      setUploadedFiles([]);
     } catch (requestError) {
       if (requestError instanceof DOMException && requestError.name === "AbortError") {
         return;
@@ -459,6 +471,9 @@ export default function ChatApp() {
         <div className="composer-wrap">
           {error && <div className="error-banner" role="alert"><strong>Could not send.</strong> {error}<button type="button" onClick={() => setError("")}>Dismiss</button></div>}
           {uploadStatus && <div className="upload-status" role="status">{uploadStatus}</div>}
+          {uploadedFiles.length > 0 && <div className="attachment-list" aria-label="Files attached to next message">
+            {uploadedFiles.map((file) => <span className="attachment-chip" key={file.key}><span aria-hidden="true">📎</span>{file.name}<button type="button" onClick={() => setUploadedFiles((current) => current.filter((item) => item.key !== file.key))} aria-label={`Remove ${file.name}`}>×</button></span>)}
+          </div>}
           <form className="composer" onSubmit={handleSubmit}>
             <textarea
               ref={textareaRef}

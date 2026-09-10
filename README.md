@@ -16,9 +16,9 @@ The first release is intentionally focused:
 - Optional Auth0 authentication through the Netlify Auth0 extension
 - Authenticated file uploads through Netlify Blobs, limited to 5 files per user per day
 
-Guests can chat without signing in. When Auth0 is configured, users can sign in while anonymous chat remains available. PostgreSQL/Prisma persistence, streaming, multimodal AI processing, and analytics remain separate follow-up work.
+Guests can chat without signing in. When Auth0 is configured, users can sign in while anonymous chat remains available. PostgreSQL/Prisma persistence, streaming, and analytics remain separate follow-up work.
 
-Signed-in users can use the plus button in the composer to upload images, PDFs, text, CSV, JSON, Word, and Excel files. Uploads are stored in Netlify Blobs, limited to 10 MB per file and 5 files per UTC day. Guest users cannot upload files. The current upload feature stores files securely; passing file contents into an AI prompt is a separate multimodal processing step.
+Signed-in users can use the plus button in the composer to upload images, PDFs, text, CSV, JSON, Word, and Excel files. Uploads are stored in Netlify Blobs, limited to 10 MB per file and 5 files per UTC day. Guest users cannot upload files. Uploaded PDFs and images are attached to the next Gemini request so prompts such as “Explain this PDF” can use the file content.
 
 ## Security
 

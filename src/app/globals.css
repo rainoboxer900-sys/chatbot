@@ -915,6 +915,40 @@ textarea:focus-visible {
   font-size: 0.72rem;
 }
 
+.attachment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  max-width: 54rem;
+  margin: 0 auto 0.6rem;
+}
+
+.attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+  padding: 0.42rem 0.55rem;
+  border: 1px solid rgba(28, 107, 103, 0.2);
+  border-radius: 0.55rem;
+  background: #edf4ef;
+  color: var(--teal);
+  font-size: 0.7rem;
+}
+
+.attachment-chip > span:not([aria-hidden]) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-chip button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.9rem;
+}
+
 .error-banner {
   max-width: 54rem;
   margin: 0 auto 0.65rem;

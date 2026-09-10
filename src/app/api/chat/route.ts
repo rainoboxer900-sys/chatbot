@@ -1,5 +1,8 @@
 import { createGoogleProvider, ProviderConfigurationError } from "@/lib/providers/google";
 import { isGoogleModel } from "@/lib/providers/models";
+import { getStore } from "@netlify/blobs";
+import { getAuth0, isAuth0Configured } from "@/lib/auth0";
+import type { ChatAttachment } from "@/lib/providers/types";
 import type { ChatMessage, ChatRole } from "@/lib/providers/types";
 
 const MAX_MESSAGES = 50;
@@ -10,7 +13,10 @@ const CHAT_ROLES: ChatRole[] = ["system", "user", "assistant"];
 type ChatRequestBody = {
   messages?: unknown;
   model?: unknown;
+  attachments?: unknown;
 };
+
+type UploadedAttachment = { key: string; name: string; mimeType: string };
 
 function isChatMessage(value: unknown): value is ChatMessage {
   if (!value || typeof value !== "object") {
@@ -30,6 +36,12 @@ function isChatMessage(value: unknown): value is ChatMessage {
 
 function invalidRequest(message: string) {
   return Response.json({ error: message }, { status: 400 });
+}
+
+function isUploadedAttachment(value: unknown): value is UploadedAttachment {
+  if (!value || typeof value !== "object") return false;
+  const attachment = value as Record<string, unknown>;
+  return typeof attachment.key === "string" && typeof attachment.name === "string" && typeof attachment.mimeType === "string";
 }
 
 function isProviderAuthenticationError(error: unknown) {
@@ -74,9 +86,43 @@ export async function POST(request: Request) {
     return invalidRequest("The conversation is too large. Start a new chat and try again.");
   }
 
+  let attachments: ChatAttachment[] = [];
+  if (body.attachments !== undefined) {
+    if (!Array.isArray(body.attachments) || body.attachments.length > 5 || !body.attachments.every(isUploadedAttachment)) {
+      return invalidRequest("Attachments are invalid.");
+    }
+
+    if (!isAuth0Configured()) {
+      return Response.json({ error: "Sign-in is required to use uploaded files." }, { status: 401 });
+    }
+
+    const userId = (await getAuth0().getSession())?.user?.sub;
+    if (!userId) {
+      return Response.json({ error: "Sign-in is required to use uploaded files." }, { status: 401 });
+    }
+
+    const userMarker = `/${encodeURIComponent(userId)}/`;
+    const store = getStore("alvionbot-uploads");
+    const loadedAttachments = await Promise.all(
+      (body.attachments as UploadedAttachment[]).map(async (attachment) => {
+        if (!attachment.key.includes(userMarker)) {
+          throw new Error("Attachment ownership check failed.");
+        }
+        const blob = await store.get(attachment.key, { type: "arrayBuffer" });
+        if (!blob) throw new Error("Uploaded file was not found.");
+        return {
+          name: attachment.name,
+          mimeType: attachment.mimeType,
+          data: Buffer.from(blob as ArrayBuffer).toString("base64"),
+        };
+      }),
+    );
+    attachments = loadedAttachments;
+  }
+
   try {
     const provider = createGoogleProvider();
-    const reply = await provider.generateReply(messages, body.model as string | undefined);
+    const reply = await provider.generateReply(messages, body.model as string | undefined, attachments);
 
     return Response.json({ reply });
   } catch (error) {

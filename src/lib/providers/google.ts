@@ -1,9 +1,12 @@
-import type { ChatMessage, ChatProvider } from "./types";
+import type { ChatAttachment, ChatMessage, ChatProvider } from "./types";
 import { DEFAULT_GOOGLE_MODEL } from "./models";
 
 const GOOGLE_GENERATIVE_LANGUAGE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 const RESPONSE_STYLE_INSTRUCTION =
   "Format answers with clean Markdown. For code, always use fenced code blocks with the language name and preserve proper indentation and line breaks; never compress a complete program into one line.";
+
+type GooglePart = { text: string } | { inlineData: { mimeType: string; data: string } };
+type GoogleContent = { role: "user" | "model"; parts: GooglePart[] };
 
 export class ProviderConfigurationError extends Error {
   constructor(message: string) {
@@ -23,17 +26,26 @@ export function createGoogleProvider(): ChatProvider {
   }
 
   return {
-    async generateReply(messages: ChatMessage[], requestedModel) {
+    async generateReply(messages: ChatMessage[], requestedModel, attachments = []) {
       const systemMessages = messages
         .filter((message) => message.role === "system")
         .map((message) => message.content)
         .join("\n\n");
-      const contents = messages
+      const contents: GoogleContent[] = messages
         .filter((message) => message.role !== "system")
         .map((message) => ({
           role: message.role === "assistant" ? "model" : "user",
           parts: [{ text: message.content }],
         }));
+
+      if (attachments.length > 0 && contents.length > 0) {
+        const lastContent = contents[contents.length - 1];
+        lastContent.parts.push(
+          ...attachments.map((attachment: ChatAttachment) => ({
+            inlineData: { mimeType: attachment.mimeType, data: attachment.data },
+          })),
+        );
+      }
 
       const instruction = [RESPONSE_STYLE_INSTRUCTION, systemMessages].filter(Boolean).join("\n\n");
       const modelName = requestedModel ?? configuredModel;
