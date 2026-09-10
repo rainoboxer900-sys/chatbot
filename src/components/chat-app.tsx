@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, FormEvent, isValidElement, startTransition, useEffect, useRef, useState, type ReactNode } from "react";
+import { Children, ChangeEvent, FormEvent, isValidElement, startTransition, useEffect, useRef, useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { DEFAULT_GOOGLE_MODEL, GOOGLE_MODELS } from "@/lib/providers/models";
@@ -122,8 +122,11 @@ export default function ChatApp() {
   const [selectedModel, setSelectedModel] = useState(DEFAULT_GOOGLE_MODEL);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const [auth, setAuth] = useState<AuthState>({ configured: false, authenticated: false });
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
   const abortRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeConversation = conversations.find((conversation) => conversation.id === activeId);
 
@@ -205,6 +208,45 @@ export default function ChatApp() {
     setIsLoading(false);
     setIsSidebarOpen(false);
     window.setTimeout(() => textareaRef.current?.focus(), 0);
+  }
+
+  async function handleFileSelection(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+
+    if (files.length === 0) {
+      return;
+    }
+
+    if (!auth.authenticated) {
+      setError(auth.configured ? "Sign in to upload files. Guest chat does not include file storage." : "File uploads require an authenticated account.");
+      return;
+    }
+
+    setError("");
+    setUploadStatus("");
+    setIsUploading(true);
+    let uploaded = 0;
+
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/uploads", { method: "POST", body: formData });
+        const data = (await response.json()) as { success?: boolean; error?: string; remaining?: number };
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error ?? "The file could not be uploaded.");
+        }
+
+        uploaded += 1;
+        setUploadStatus(`${uploaded} file${uploaded === 1 ? "" : "s"} stored. ${data.remaining} upload${data.remaining === 1 ? "" : "s"} left today.`);
+      }
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "The file could not be uploaded.");
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -416,6 +458,7 @@ export default function ChatApp() {
 
         <div className="composer-wrap">
           {error && <div className="error-banner" role="alert"><strong>Could not send.</strong> {error}<button type="button" onClick={() => setError("")}>Dismiss</button></div>}
+          {uploadStatus && <div className="upload-status" role="status">{uploadStatus}</div>}
           <form className="composer" onSubmit={handleSubmit}>
             <textarea
               ref={textareaRef}
@@ -432,6 +475,23 @@ export default function ChatApp() {
               rows={1}
               disabled={isLoading}
             />
+            <input ref={fileInputRef} className="file-input" type="file" multiple accept="image/*,.pdf,.txt,.csv,.json,.doc,.docx,.xls,.xlsx" onChange={handleFileSelection} />
+            <button
+              className="attach-button"
+              type="button"
+              aria-label={auth.authenticated ? "Upload files" : "Sign in to upload files"}
+              title={auth.authenticated ? "Upload files" : "Sign in to upload files"}
+              disabled={isUploading || isLoading}
+              onClick={() => {
+                if (!auth.authenticated) {
+                  setError(auth.configured ? "Sign in to upload files." : "File uploads require an authenticated account.");
+                  return;
+                }
+                fileInputRef.current?.click();
+              }}
+            >
+              {isUploading ? "…" : "+"}
+            </button>
             <button className="send-button" type="submit" disabled={!input.trim() || isLoading} aria-label="Send message">↑</button>
           </form>
           <p className="composer-note">Responses use your configured provider. Conversations stay in this browser.</p>

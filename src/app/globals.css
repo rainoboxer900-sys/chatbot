@@ -851,6 +851,36 @@ textarea:focus-visible {
   line-height: 1.45;
 }
 
+.file-input {
+  display: none;
+}
+
+.attach-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: #f5f2eb;
+  color: var(--teal);
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.attach-button:hover:not(:disabled) {
+  border-color: rgba(28, 107, 103, 0.35);
+  background: #eaf1ec;
+}
+
+.attach-button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
 .composer textarea::placeholder {
   color: #909b95;
 }
@@ -876,6 +906,13 @@ textarea:focus-visible {
   color: var(--ink-soft);
   font-size: 0.65rem;
   text-align: center;
+}
+
+.upload-status {
+  max-width: 54rem;
+  margin: 0 auto 0.65rem;
+  color: var(--teal);
+  font-size: 0.72rem;
 }
 
 .error-banner {
