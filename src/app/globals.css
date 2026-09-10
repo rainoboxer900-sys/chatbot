@@ -72,7 +72,9 @@ textarea:focus-visible {
 .sidebar {
   display: flex;
   flex-direction: column;
+  height: calc(100svh - 2rem);
   min-height: calc(100svh - 2rem);
+  overflow: hidden;
   padding: 1.25rem;
 }
 
@@ -177,7 +179,9 @@ textarea:focus-visible {
 .conversation-section {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
   margin-top: 2rem;
+  scrollbar-width: thin;
 }
 
 .section-label {
@@ -285,6 +289,7 @@ textarea:focus-visible {
 }
 
 .sidebar-footer {
+  flex: 0 0 auto;
   gap: 0.55rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--line);
@@ -306,6 +311,7 @@ textarea:focus-visible {
 }
 
 .account-area {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 0.6rem;
