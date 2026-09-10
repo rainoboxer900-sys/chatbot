@@ -382,10 +382,15 @@ textarea:focus-visible {
 }
 
 .chat-header {
+  position: sticky;
+  z-index: 4;
+  top: 0;
   justify-content: space-between;
   min-height: 5.25rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--line);
+  background: rgba(251, 250, 247, 0.96);
+  backdrop-filter: blur(12px);
 }
 
 .chat-header h2 {
