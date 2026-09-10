@@ -98,7 +98,7 @@ textarea:focus-visible {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 0.8rem;
-  background: var(--teal);
+  background: var(--accent);
   color: #f8f3e7;
   font-size: 0.72rem;
   font-weight: 700;

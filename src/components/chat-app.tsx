@@ -279,10 +279,10 @@ export default function ChatApp() {
     <main className="chat-shell">
       <aside className={`sidebar ${isSidebarOpen ? "sidebar-open" : ""}`}>
         <div className="sidebar-header">
-          <div className="brand-mark" aria-hidden="true">AI</div>
+          <div className="brand-mark" aria-hidden="true">A</div>
           <div>
-            <p className="eyebrow">Private workspace</p>
-            <h1>Signal Chat</h1>
+            <p className="eyebrow">Personal AI workspace</p>
+            <h1>AlvionBot</h1>
           </div>
           <button className="icon-button mobile-close" type="button" onClick={() => setIsSidebarOpen(false)} aria-label="Close conversation list">×</button>
         </div>
@@ -394,14 +394,14 @@ export default function ChatApp() {
             <div className="message-list">
               {activeConversation.messages.map((message, index) => (
                 <article className={`message-row message-${message.role}`} key={`${message.role}-${index}`}>
-                  <div className="message-avatar" aria-hidden="true">{message.role === "user" ? "YOU" : "AI"}</div>
+                  <div className="message-avatar" aria-hidden="true">{message.role === "user" ? "YOU" : "A"}</div>
                   <div className="message-body">
                     <div className="message-meta"><strong>{message.role === "user" ? "You" : "Signal"}</strong><span>{message.role === "assistant" ? "Assistant" : "Message"}</span></div>
                     {message.role === "assistant" ? <AssistantMessage content={message.content} /> : <p>{message.content}</p>}
                   </div>
                 </article>
               ))}
-              {isLoading && <div className="message-row message-assistant"><div className="message-avatar" aria-hidden="true">AI</div><div className="message-body"><div className="message-meta"><strong>Signal</strong><span>Thinking</span></div><div className="typing-indicator" aria-label="Assistant is thinking"><span /><span /><span /></div></div></div>}
+              {isLoading && <div className="message-row message-assistant"><div className="message-avatar" aria-hidden="true">A</div><div className="message-body"><div className="message-meta"><strong>AlvionBot</strong><span>Thinking</span></div><div className="typing-indicator" aria-label="Assistant is thinking"><span /><span /><span /></div></div></div>}
             </div>
           ) : (
             <div className="empty-state">

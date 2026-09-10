@@ -1,7 +1,7 @@
 
-# AI Chat
+# AlvionBot
 
-A secure Next.js chat MVP using Google AI Studio and Gemini 3.6 Flash.
+A focused Next.js AI workspace using Google AI Studio and Gemini 3.6 Flash.
 
 ## Status
 

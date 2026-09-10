@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Signal Chat",
-  description: "A private, focused AI chat workspace.",
+  title: "AlvionBot",
+  description: "A focused AI workspace powered by AlvionBot.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
