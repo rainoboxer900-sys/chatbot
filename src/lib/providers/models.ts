@@ -6,15 +6,15 @@ export type GoogleModel = {
   badge?: string;
 };
 
-export const DEFAULT_GOOGLE_MODEL = "gemini-3.6-flash";
+export const DEFAULT_GOOGLE_MODEL = "gemini-3.5-flash-lite";
 
 export const GOOGLE_MODELS: GoogleModel[] = [
   {
-    id: "gemini-3.6-flash",
-    label: "3.6 Flash",
-    description: "All-around help",
+    id: "gemini-3.5-flash-lite",
+    label: "3.5 Flash-Lite",
+    description: "Default fast answers",
     available: true,
-    badge: "New",
+    badge: "Default",
   },
   {
     id: "gemini-3.5-flash",
@@ -23,9 +23,9 @@ export const GOOGLE_MODELS: GoogleModel[] = [
     available: false,
   },
   {
-    id: "gemini-3.5-flash-lite",
-    label: "3.5 Flash-Lite",
-    description: "Fast fallback answers",
+    id: "gemini-3.1-flash-lite",
+    label: "3.1 Flash-Lite",
+    description: "Fallback answers",
     available: true,
     badge: "Fallback",
   },
