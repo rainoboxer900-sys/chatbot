@@ -176,6 +176,7 @@ export default function ChatApp() {
     abortRef.current?.abort();
     setIsLoading(false);
     setError("");
+    setUploadError("");
     setActiveId(id);
     setIsSidebarOpen(false);
   }
@@ -204,6 +205,7 @@ export default function ChatApp() {
     setActiveId(initial.id);
     setInput("");
     setError("");
+    setUploadError("");
     setIsLoading(false);
   }
 
@@ -214,6 +216,7 @@ export default function ChatApp() {
     setActiveId(next.id);
     setInput("");
     setError("");
+    setUploadError("");
     setIsLoading(false);
     setIsSidebarOpen(false);
     window.setTimeout(() => textareaRef.current?.focus(), 0);
@@ -276,6 +279,7 @@ export default function ChatApp() {
 
     setInput("");
     setError("");
+    setUploadError("");
     setIsLoading(true);
     setConversations((current) =>
       current.map((conversation) =>
@@ -452,7 +456,7 @@ export default function ChatApp() {
                 <article className={`message-row message-${message.role}`} key={`${message.role}-${index}`}>
                   <div className="message-avatar" aria-hidden="true">{message.role === "user" ? "YOU" : "A"}</div>
                   <div className="message-body">
-                    <div className="message-meta"><strong>{message.role === "user" ? "You" : "Signal"}</strong><span>{message.role === "assistant" ? "Assistant" : "Message"}</span></div>
+                    <div className="message-meta"><strong>{message.role === "user" ? "You" : "AlvionBot"}</strong><span>{message.role === "assistant" ? "Assistant" : "Message"}</span></div>
                     {message.role === "assistant" ? <AssistantMessage content={message.content} /> : <p>{message.content}</p>}
                   </div>
                 </article>
