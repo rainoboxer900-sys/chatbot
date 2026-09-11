@@ -301,7 +301,11 @@ export default function ChatApp() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: messagesForRequest, model: selectedModel, attachments: uploadedFiles }),
+        body: JSON.stringify({
+          messages: messagesForRequest,
+          model: selectedModel,
+          ...(uploadedFiles.length > 0 && { attachments: uploadedFiles }),
+        }),
         signal: controller.signal,
       });
       const data = (await response.json()) as { reply?: string; error?: string };

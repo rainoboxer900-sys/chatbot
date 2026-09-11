@@ -87,8 +87,8 @@ export async function POST(request: Request) {
   }
 
   let attachments: ChatAttachment[] = [];
-  if (body.attachments !== undefined) {
-    if (!Array.isArray(body.attachments) || body.attachments.length > 5 || !body.attachments.every(isUploadedAttachment)) {
+  if (Array.isArray(body.attachments) && body.attachments.length > 0) {
+    if (body.attachments.length > 5 || !body.attachments.every(isUploadedAttachment)) {
       return invalidRequest("Attachments are invalid.");
     }
 
