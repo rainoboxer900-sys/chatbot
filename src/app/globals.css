@@ -981,6 +981,13 @@ textarea:focus-visible {
   text-decoration: underline;
 }
 
+.upload-error a {
+  margin-left: 0.35rem;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 .sidebar-scrim {
   display: none;
 }

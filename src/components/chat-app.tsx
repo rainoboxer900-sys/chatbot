@@ -125,6 +125,7 @@ export default function ChatApp() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [uploadError, setUploadError] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_GOOGLE_MODEL);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
@@ -227,11 +228,12 @@ export default function ChatApp() {
     }
 
     if (!auth.authenticated) {
-      setError(auth.configured ? "Sign in to upload files. Guest chat does not include file storage." : "File uploads require an authenticated account.");
+      setUploadError(auth.configured ? "Sign in to upload files. Guest chat remains available." : "File uploads require an authenticated account.");
       return;
     }
 
     setError("");
+    setUploadError("");
     setUploadStatus("");
     setIsUploading(true);
     let uploaded = 0;
@@ -254,7 +256,7 @@ export default function ChatApp() {
         setUploadStatus(`${uploaded} file${uploaded === 1 ? "" : "s"} stored. ${data.remaining} upload${data.remaining === 1 ? "" : "s"} left today.`);
       }
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "The file could not be uploaded.");
+      setUploadError(uploadError instanceof Error ? uploadError.message : "The file could not be uploaded.");
     } finally {
       setIsUploading(false);
     }
@@ -470,6 +472,7 @@ export default function ChatApp() {
 
         <div className="composer-wrap">
           {error && <div className="error-banner" role="alert"><strong>Could not send.</strong> {error}<button type="button" onClick={() => setError("")}>Dismiss</button></div>}
+          {uploadError && <div className="error-banner upload-error" role="alert"><strong>Upload unavailable.</strong> {uploadError}{auth.configured && !auth.authenticated && <a href="/auth/login">Sign in</a>}<button type="button" onClick={() => setUploadError("")}>Dismiss</button></div>}
           {uploadStatus && <div className="upload-status" role="status">{uploadStatus}</div>}
           {uploadedFiles.length > 0 && <div className="attachment-list" aria-label="Files attached to next message">
             {uploadedFiles.map((file) => <span className="attachment-chip" key={file.key}><span aria-hidden="true">📎</span>{file.name}<button type="button" onClick={() => setUploadedFiles((current) => current.filter((item) => item.key !== file.key))} aria-label={`Remove ${file.name}`}>×</button></span>)}
@@ -499,7 +502,7 @@ export default function ChatApp() {
               disabled={isUploading || isLoading}
               onClick={() => {
                 if (!auth.authenticated) {
-                  setError(auth.configured ? "Sign in to upload files." : "File uploads require an authenticated account.");
+                  setUploadError(auth.configured ? "Sign in to upload files. Guest chat remains available." : "File uploads require an authenticated account.");
                   return;
                 }
                 fileInputRef.current?.click();
